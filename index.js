@@ -65,11 +65,9 @@ export const checkIfHasSMSPermission = async () => {
   }
 
   try {
-    const [hasReceiveSmsPermission, hasReadSmsPermission] = await Promise.all([
-      PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECEIVE_SMS),
-      PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_SMS),
-    ]);
-  
+    const hasReadSmsPermission = await PromiseAndroid.check(PromiseAndroid.PERMISSIONS.READ_SMS);
+    const hasReceiveSmsPermission = await PromiseAndroid.check(PromiseAndroid.PERMISSIONS.RECEIVE_SMS);
+
     return {
       hasReceiveSmsPermission,
       hasReadSmsPermission,

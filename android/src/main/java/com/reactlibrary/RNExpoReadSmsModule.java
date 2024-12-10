@@ -1,6 +1,8 @@
 
 package com.reactlibrary;
 
+import android.os.Build;
+import android.content.pm.ApplicationInfo;
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -41,19 +43,20 @@ public class RNExpoReadSmsModule extends ReactContextBaseJavaModule {
   public void startReadSMS(final Callback success, final Callback error) {
     try{
       if (ContextCompat.checkSelfPermission(reactContext, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED
-              && ContextCompat.checkSelfPermission(reactContext, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED) {
+          && ContextCompat.checkSelfPermission(reactContext, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED) {
         msgReceiver = new BroadcastReceiver() {
           @Override
           public void onReceive(Context context, Intent intent) {
             reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                    .emit("received_sms", getMessageFromMessageIntent(intent));
+              .emit("received_sms", getMessageFromMessageIntent(intent));
           }
         };
         String SMS_RECEIVED_ACTION = "android.provider.Telephony.SMS_RECEIVED";
-        if(Build.VERSION.SDK_INT >= 34 && getApplicationInfo().targetSdkVersion >= 34) {
-          reactContext.registerReceiver(msgReceiver, new IntentFilter(SMS_RECEIVED_ACTION), Context.RECEIVER_EXPORTED);
+        ApplicationInfo appInfo = reactContext.getApplicationInfo(); // Get application info
+        if (Build.VERSION.SDK_INT >= 34 && appInfo.targetSdkVersion >= 34) {
+            reactContext.registerReceiver(msgReceiver, new IntentFilter(SMS_RECEIVED_ACTION), Context.RECEIVER_EXPORTED);
         } else {
-          reactContext.registerReceiver(msgReceiver, new IntentFilter(SMS_RECEIVED_ACTION));
+            reactContext.registerReceiver(msgReceiver, new IntentFilter(SMS_RECEIVED_ACTION));
         }
         success.invoke("Start Read SMS successfully");
       } else {
